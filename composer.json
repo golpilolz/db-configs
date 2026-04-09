@@ -2,18 +2,26 @@
   "name": "golpilolz/db-configs",
   "type": "symfony-bundle",
   "description": "Store configurations in the database and use them in your Symfony application.",
-  "keywords": [],
+  "keywords": ["bundle", "symfony"],
   "license": "MIT",
+  "authors": [
+    {
+      "name": "Golpilolz and other contributors",
+      "homepage": "https://github.com/golpilolz/db-configs/graphs/contributors"
+    }
+  ],
   "autoload": {
     "psr-4": {
-      "Golpilolz\\DBConfigs\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Golpilolz\\DBConfigs\\Tests\\": "tests/"
-    }
+      "Golpilolz\\DBConfigs\\": ""
+    },
+    "exclude-from-classmap": [ "/Tests/" ]
   },
   "require": {},
-  "minimum-stability": "dev"
+  "minimum-stability": "dev",
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "symfony/runtime": true
+    }
+  }
 }

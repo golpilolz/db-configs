@@ -4,7 +4,7 @@ namespace Golpilolz\DBConfigs\Service;
 
 use Golpilolz\DBConfigs\Repository\SiteVariableRepository;
 
-readonly class ConfigService
+readonly class GolpilolzDBConfigsConfigService
 {
     public function __construct(private SiteVariableRepository $repository)
     {
@@ -24,7 +24,7 @@ readonly class ConfigService
      * @param array<string, string> $fallback
      * @return array<string, string>
      */
-    public function getJson(string $key, array $fallback = []): array
+    public function getArray(string $key, array $fallback = []): array
     {
         $raw = $this->get($key);
 
@@ -38,17 +38,6 @@ readonly class ConfigService
         return is_array($decoded) ? $decoded : $fallback;
     }
 
-    public function getValueFromJson(string $key, string $subKey, string $fallback = ""): string
-    {
-        $json = $this->getJson($key);
-
-        if (!isset($json[$subKey])) {
-            return $fallback;
-        }
-
-        return $json[$subKey];
-    }
-
     public function set(string $key, string $value): void
     {
         $this->repository->save($key, $value);
@@ -59,7 +48,7 @@ readonly class ConfigService
      * @throws \JsonException
      * @param array<string, string> $data
      */
-    public function setJson(string $key, array $data): void
+    public function setArray(string $key, array $data): void
     {
         $this->set($key, json_encode($data, JSON_THROW_ON_ERROR));
     }
