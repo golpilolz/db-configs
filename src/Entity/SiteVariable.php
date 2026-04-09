@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Golpilolz\DBConfigs;
+namespace Golpilolz\DBConfigs\Entity;
 
 use Golpilolz\DBConfigs\Repository\SiteVariableRepository;
 use Doctrine\DBAL\Types\Types;
