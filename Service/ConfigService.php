@@ -3,8 +3,9 @@
 namespace Golpilolz\DBConfigs\Service;
 
 use Golpilolz\DBConfigs\Repository\SiteVariableRepository;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
-readonly class GolpilolzDBConfigsConfigService
+readonly class ConfigService
 {
     public function __construct(private SiteVariableRepository $repository)
     {
