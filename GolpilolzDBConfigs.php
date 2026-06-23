@@ -10,7 +10,7 @@ class GolpilolzDBConfigs extends AbstractBundle
 {
     public function getPath(): string
     {
-        return \dirname(__DIR__);
+        return __DIR__;
     }
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void {
