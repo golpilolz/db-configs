@@ -3,7 +3,6 @@
 namespace Golpilolz\DBConfigs\Service;
 
 use Golpilolz\DBConfigs\Repository\SiteVariableRepository;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 readonly class ConfigService
 {
@@ -16,9 +15,7 @@ readonly class ConfigService
      */
     public function get(string $key): string
     {
-        $variable = $this->repository->getValue($key);
-
-        return (string) $variable->getValue();
+        return $this->repository->findOneByName($key)?->getValue() ?? '';
     }
 
     /**
@@ -65,7 +62,7 @@ readonly class ConfigService
         $out = [];
 
         foreach ($items as $item) {
-            $out[$item->getName()] = (string) $item->getValue();
+            $out[(string) $item->getName()] = $item->getValue();
         }
 
         return $out;

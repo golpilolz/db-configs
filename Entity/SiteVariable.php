@@ -14,13 +14,13 @@ class SiteVariable
 {
     #[ORM\Id]
     #[ORM\Column(length: 255)]
-    private string $name;
+    private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private string $value;
+    private string $value = '';
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $updatedAt;
+    private ?\DateTimeInterface $updatedAt = null;
 
     public function getName(): ?string
     {
@@ -34,7 +34,7 @@ class SiteVariable
         return $this;
     }
 
-    public function getValue(): ?string
+    public function getValue(): string
     {
         return $this->value;
     }

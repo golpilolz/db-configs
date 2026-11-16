@@ -6,6 +6,8 @@ namespace Golpilolz\DBConfigs\Repository;
 
 use Golpilolz\DBConfigs\Entity\SiteVariable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -18,41 +20,39 @@ class SiteVariableRepository extends ServiceEntityRepository
         parent::__construct($registry, SiteVariable::class);
     }
 
-    public function save(string $name, string $value): SiteVariable
+    /**
+     * Upsert written with DBAL, not the ORM: it does not flush the caller's
+     * other pending changes, and two concurrent saves of a new name cannot
+     * crash on the primary key.
+     */
+    public function save(string $name, string $value): void
     {
-        $variable = $this->findOneBy(['name' => $name]);
-
-        if (!$variable instanceof SiteVariable) {
-            $variable = new SiteVariable();
-            $variable->setName($name);
-        }
-
-        $variable->setValue($value)
-            ->setUpdatedAt(new \DateTime());
-
         $em = $this->getEntityManager();
-        $em->persist($variable);
-        $em->flush();
+        $metadata = $this->getClassMetadata();
+        $connection = $em->getConnection();
 
-        return $variable;
-    }
+        $table = $metadata->getTableName();
+        $nameColumn = $metadata->getColumnName('name');
+        $data = [
+            $metadata->getColumnName('value') => $value,
+            $metadata->getColumnName('updatedAt') => new \DateTime(),
+        ];
+        $types = [$metadata->getColumnName('updatedAt') => Types::DATETIME_MUTABLE];
 
-    public function getValue(string $name): SiteVariable
-    {
-        $variable = $this->findOneBy(['name' => $name]);
-
-        if (!$variable instanceof SiteVariable) {
-            $variable = new SiteVariable();
-            $variable->setName($name)
-                ->setValue('')
-                ->setUpdatedAt(new \DateTime());
-
-            $em = $this->getEntityManager();
-            $em->persist($variable);
-            $em->flush();
+        if ($connection->update($table, $data, [$nameColumn => $name], $types) === 0) {
+            try {
+                $connection->insert($table, [$nameColumn => $name] + $data, $types);
+            } catch (UniqueConstraintViolationException) {
+                // Another process inserted the same name in between: ours is the latest value.
+                $connection->update($table, $data, [$nameColumn => $name], $types);
+            }
         }
 
-        return $variable;
+        // Keep an entity already loaded in this request in sync with the database.
+        $managed = $em->getUnitOfWork()->tryGetById($name, SiteVariable::class);
+        if ($managed !== false) {
+            $em->refresh($managed);
+        }
     }
 
     /**
@@ -61,16 +61,7 @@ class SiteVariableRepository extends ServiceEntityRepository
     #[\Override]
     public function findAll(): array
     {
-        /** @var array<int, SiteVariable> $variables */
-        $variables = $this->createQueryBuilder('s')
-            ->addSelect('CASE WHEN s.updatedAt IS NULL THEN 1 ELSE 0 END AS HIDDEN updatedAtNull')
-            ->orderBy('updatedAtNull', 'ASC')
-            ->addOrderBy('s.updatedAt', 'DESC')
-            ->addOrderBy('s.name', 'ASC')
-            ->getQuery()
-            ->getResult();
-
-        return $variables;
+        return $this->findBy([], ['updatedAt' => 'DESC', 'name' => 'ASC']);
     }
 
     public function findOneByName(string $name): ?SiteVariable

@@ -27,7 +27,7 @@ class ConfigServiceTest extends TestCase
 
         $this->repository
             ->expects(self::once())
-            ->method('getValue')
+            ->method('findOneByName')
             ->with('site_name')
             ->willReturn($variable);
 
@@ -39,10 +39,18 @@ class ConfigServiceTest extends TestCase
         $variable = (new SiteVariable())->setName('empty_key')->setValue('');
 
         $this->repository
-            ->method('getValue')
+            ->method('findOneByName')
             ->willReturn($variable);
 
         self::assertSame('', $this->service->get('empty_key'));
+    }
+
+    public function testGetReturnsEmptyStringWhenMissingAndDoesNotWrite(): void
+    {
+        $this->repository->method('findOneByName')->willReturn(null);
+        $this->repository->expects(self::never())->method('save');
+
+        self::assertSame('', $this->service->get('missing'));
     }
 
     public function testSetCallsRepositorySave(): void
@@ -61,7 +69,7 @@ class ConfigServiceTest extends TestCase
         $variable = (new SiteVariable())->setName('my_array')->setValue(json_encode($data));
 
         $this->repository
-            ->method('getValue')
+            ->method('findOneByName')
             ->willReturn($variable);
 
         self::assertSame($data, $this->service->getArray('my_array'));
@@ -72,7 +80,7 @@ class ConfigServiceTest extends TestCase
         $variable = (new SiteVariable())->setName('missing')->setValue('');
 
         $this->repository
-            ->method('getValue')
+            ->method('findOneByName')
             ->willReturn($variable);
 
         $fallback = ['default' => 'value'];
@@ -84,7 +92,7 @@ class ConfigServiceTest extends TestCase
         $variable = (new SiteVariable())->setName('bad_json')->setValue('not-json');
 
         $this->repository
-            ->method('getValue')
+            ->method('findOneByName')
             ->willReturn($variable);
 
         $fallback = ['x' => 'y'];
@@ -96,7 +104,7 @@ class ConfigServiceTest extends TestCase
         $variable = (new SiteVariable())->setName('missing')->setValue('');
 
         $this->repository
-            ->method('getValue')
+            ->method('findOneByName')
             ->willReturn($variable);
 
         self::assertSame([], $this->service->getArray('missing'));
@@ -107,7 +115,7 @@ class ConfigServiceTest extends TestCase
         $variable = (new SiteVariable())->setName('scalar')->setValue('"just a string"');
 
         $this->repository
-            ->method('getValue')
+            ->method('findOneByName')
             ->willReturn($variable);
 
         $fallback = ['fallback' => 'used'];
