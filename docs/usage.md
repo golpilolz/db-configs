@@ -14,7 +14,7 @@ final class HomeController
     public function __invoke(): Response
     {
         $title = $this->config->get('site_title');
-        $social = $this->config->getArray('social_links', ['twitter' => '']);
+        $hours = $this->config->getArray('opening_hours', ['monday' => 'closed']);
         // ...
     }
 }

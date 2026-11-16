@@ -5,8 +5,8 @@ Symfony bundle to store site settings as name/value pairs in the database and re
 ```php
 $config->set('site_title', 'My site');
 $config->get('site_title');                         // 'My site'
-$config->setArray('social_links', ['twitter' => '@me']);
-$config->getArray('social_links');                  // ['twitter' => '@me']
+$config->setArray('opening_hours', ['monday' => '9:00-18:00']);
+$config->getArray('opening_hours');                 // ['monday' => '9:00-18:00']
 ```
 
 ## Documentation
